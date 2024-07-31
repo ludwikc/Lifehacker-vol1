@@ -1,0 +1,38 @@
+name: Sync to Lifehacker
+
+on:
+  push:
+    branches:
+      - main  # or specify the branch you want to track
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ksiazka repository
+        uses: actions/checkout@v3
+
+      - name: Checkout Lifehacker repository
+        uses: actions/checkout@v3
+        with:
+          repository: ludwikc/Lifehacker
+          path: Lifehacker
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy ksiazka content to Lifehacker/docs/vol1
+        run: |
+          rm -rf Lifehacker/docs/vol1
+          mkdir -p Lifehacker/docs/vol1
+          cp -r * Lifehacker/docs/vol1
+
+      - name: Commit and push changes to ludwikc.net
+        run: |
+          cd Lifehacker
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add docs/vol1
+          git commit -m "Update docs/vol1 with latest from ksiazka"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
